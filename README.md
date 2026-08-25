@@ -47,11 +47,9 @@ Ajout d’un timeout=10 pour sécuriser les appels réseau
 ✔️ Étape 7 — Secure Authentication
 Suppression de la clé API en dur dans le code
 
-Utilisation d’une variable d’environnement :
-TWELVE_DATA_API_KEY
+Utilisation d’une variable d’environnement : TWELVE_DATA_API_KEY
 
-Authentification via header HTTP :
-Authorization: apikey <clé>
+Authentification via header HTTP : Authorization: apikey <clé>
 
 ✔️ Étape 8 — JSON Parsing
 Conversion de la réponse en dictionnaire Python via response.json()
@@ -75,3 +73,55 @@ Récupération de données Forex réelles (EUR/USD, intervalle H1)
 Extraction des 10 dernières bougies OHLC
 
 Base du pipeline de données validée
+
+🚀 Phase 3 — Data Processing (pandas)
+Objectif : transformer les données brutes issues de l’API Twelve Data en données réellement exploitables pour l’analyse et le stockage.
+
+✔️ Étape 11 — DataFrame pandas
+Transformation de data["values"] en DataFrame
+
+Inspection des types (df.dtypes)
+
+Mise en évidence des limites des données brutes (tout en string)
+
+✔️ Étape 12 — Conversion des types
+Conversion de la colonne datetime en datetime64
+
+Conversion des colonnes OHLC (open, high, low, close) en float64
+
+Suppression des lignes invalides (NaN)
+
+✔️ Étape 13 — Nettoyage et validation
+Tri chronologique du DataFrame
+
+Suppression des doublons temporels (drop_duplicates(subset=["datetime"]))
+
+Réindexation propre
+
+Contrôles qualité :
+
+df.isnull().sum() → validation des valeurs manquantes
+
+df.duplicated(subset=["datetime"]).sum() → validation de l’unicité temporelle
+
+✔️ Étape 14 — Séparation brut / nettoyé
+Ajout de df = df.copy() pour éviter de modifier le DataFrame brut
+
+Conservation de :
+
+raw_df → données originales
+
+clean_df → données transformées et prêtes pour SQLite
+
+🎯 Résultat
+Le pipeline produit désormais un DataFrame :
+
+propre
+
+typé correctement
+
+trié
+
+validé
+
+prêt pour la phase suivante : SQLite Storage
