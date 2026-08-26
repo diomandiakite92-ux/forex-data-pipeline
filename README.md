@@ -3,6 +3,7 @@ Pipeline pédagogique visant à construire progressivement une architecture de r
 Le projet est structuré en phases, chacune introduisant un composant essentiel du pipeline.
 
 🧩 Phase 1 — Core Structure
+
 Objectif : établir les fondations du projet et manipuler les premières structures Python.
 
 ✔️ Étape 1 — Initial Output
@@ -35,6 +36,7 @@ Passage du dictionnaire aux fonctions
 Structuration du code via main()
 
 🌐 Phase 2 — API Integration Layer (Twelve Data)
+
 Objectif : apprendre à interagir avec une API réelle, analyser les réponses, gérer les erreurs, sécuriser l’authentification et structurer la logique réseau.
 
 ✔️ Étape 6 — HTTP Request Handling
@@ -75,6 +77,7 @@ Extraction des 10 dernières bougies OHLC
 Base du pipeline de données validée
 
 🚀 Phase 3 — Data Processing (pandas)
+
 Objectif : transformer les données brutes issues de l’API Twelve Data en données réellement exploitables pour l’analyse et le stockage.
 
 ✔️ Étape 11 — DataFrame pandas
@@ -127,6 +130,7 @@ validé
 prêt pour la phase suivante : SQLite Storage
 
 🗄️ Phase 4 — SQLite Storage (Load)
+
 Objectif : stocker les bougies nettoyées dans une base SQLite, avec gestion des doublons.
 
 ✔️ Étape 15 — Database Initialization
@@ -188,3 +192,259 @@ Code
 Inserted candles: 0
 Rows in database: 11
 Pipeline incrémental validé
+
+🌐 Sprint 5 — Lecture historique + Indicateurs SMA
+
+Objectif : exploiter l’historique stocké pour calculer des indicateurs techniques.
+
+✔ Lecture historique
+Ajout de :
+
+Code
+load_candles(symbol, timeframe)
+Retourne un DataFrame pandas complet, trié, typé, prêt pour l’analyse.
+
+✔ Indicateurs SMA
+Création de indicators.py :
+
+sma_5 → moyenne mobile courte
+
+sma_20 → moyenne mobile longue
+
+Détection des croisements :
+
+BUY
+SMA5 franchit SMA20 à la hausse
+
+SELL
+SMA5 franchit SMA20 à la baisse
+
+✔ Pipeline Sprint 5
+Code
+SQLite
+↓
+load_candles()
+↓
+add_sma_strategy()
+↓
+BUY / SELL
+
+📅 Sprint 5.5 — Récupération historique 2025 (Twelve Data)
+
+Objectif : obtenir une année complète de données pour un backtest crédible.
+
+✔ Problème
+Twelve Data limite outputsize → impossible d’obtenir 2025 en un seul appel.
+
+✔ Solution
+Découpage en deux fenêtres :
+
+01/01/2025 → 30/06/2025
+
+01/07/2025 → 31/12/2025
+
+Avec bornes horaires explicites :
+
+Code
+2025-01-01 00:00:00 → 2025-06-30 23:59:59
+2025-07-01 00:00:00 → 2025-12-31 23:59:59
+✔ Fusion
+Les deux listes values sont fusionnées puis nettoyées via clean_dataframe().
+
+✔ Logs mémoire-ready
+Jan-Jun candles: ...
+
+Jul-Dec candles: ...
+
+Historical candles received: ...
+
+Inserted candles: ...
+
+Rows in database: ...
+
+✔ Pipeline Sprint 5.5
+Code
+fetch_eurusd_2025()
+↓
+clean_dataframe()
+↓
+save_candles()
+↓
+load_candles()
+
+🚀 Sprint 6 — Backtest SMA 5 / SMA 20
+
+Objectif : transformer les signaux BUY/SELL en vrais trades simulés.
+
+✔ Règles du backtest
+Capital initial : 10 000 €
+
+Une seule position à la fois
+
+Pas de short
+
+BUY → entrée en position
+
+SELL → sortie de position
+
+Profit = capital × rendement du trade
+
+✔ Données enregistrées pour chaque trade
+entry_date
+
+exit_date
+
+entry_price
+
+exit_price
+
+return_pct
+
+profit
+
+✔ Métriques calculées
+Capital initial
+
+Capital final
+
+Performance %
+
+Nombre de trades
+
+Trades gagnants
+
+Trades perdants
+
+Win rate %
+
+✔ Pipeline Sprint 6
+Code
+fetch_eurusd_2025()
+↓
+clean_dataframe()
+↓
+save_candles()
+↓
+load_candles()
+↓
+add_sma_strategy()
+↓
+backtest_strategy()
+↓
+calculate_metrics()
+✔ Exemple de sortie
+Code
+=== BACKTEST RESULTS ===
+Initial capital : 10000.00 €
+Final capital : 10426.55 €
+Return : 4.26 %
+Trades : 12
+Winning trades : 7
+Losing trades : 5
+Win rate : 58.33 %
+🧱 Architecture actuelle du projet
+Code
+src/
+├── main.py
+├── twelve_data_client.py
+├── transform.py
+├── database.py
+├── indicators.py
+└── backtest.py
+
+🟨 Sprint 7 — Métriques avancées (qualité de la stratégie)
+Ajout des métriques essentielles pour un mémoire et un dashboard :
+
+✔ Max drawdown
+Mesure la plus forte baisse du capital depuis un sommet précédent.
+
+✔ Profit moyen par trade
+Performance moyenne par opération.
+
+✔ Gain moyen des trades gagnants
+Indique la qualité des trades gagnants.
+
+✔ Perte moyenne des trades perdants
+Affichée en valeur absolue pour plus de lisibilité.
+
+✔ Profit factor
+Code
+somme des gains / somme des pertes absolues
+✔ Risk/Reward ratio
+Code
+average_win / average_loss
+Indique si les gains compensent les pertes.
+
+✔ Exemple de sortie
+Code
+=== BACKTEST RESULTS ===
+Initial capital : 10000.00 €
+Final capital : 10418.00 €
+Return : 4.18 %
+Trades : 32
+Winning trades : 11
+Losing trades : 21
+Win rate : 34.37 %
+Average profit : 13.06 €
+Average win : 87.12 €
+Average loss : 24.55 €
+Profit factor : 1.55
+Risk/Reward : 3.55
+Max drawdown : -9.52 %
+
+🟦 Sprint 8 — Dashboard Streamlit
+Le dashboard permet une visualisation complète du backtest.
+
+✔ KPI principaux
+Capital final
+
+Rendement
+
+Win Rate
+
+Max Drawdown
+
+✔ KPI avancés
+Nombre de trades
+
+Profit Factor
+
+Avg Win / Avg Loss
+
+✔ Graphique principal (Plotly)
+Courbe du prix EUR/USD
+
+SMA 5
+
+SMA 20
+
+Marqueurs BUY ▲
+
+Marqueurs SELL ▼
+
+✔ Equity Curve
+Courbe du capital
+
+Ligne horizontale du capital initial
+
+✔ Table des trades
+return_pct affiché en %
+
+profits / pertes par trade
+
+✔ Hypothèses du backtest
+Pas de stop loss fixe
+
+Pas de take profit fixe
+
+Pas de spread / slippage / frais
+
+Une seule position à la fois
+
+Sortie uniquement sur croisement inverse
+
+Exposition proportionnelle au capital
+
+✔ Lancement du dashboard
+Code
+python -m streamlit run src/dashboard.py
