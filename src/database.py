@@ -68,3 +68,33 @@ def save_candles(df, symbol, timeframe):
     print(f"Rows in database: {total_rows}")
 
     return inserted, total_rows
+def load_candles(symbol, timeframe):
+    """
+    Lit les bougies depuis SQLite et retourne un DataFrame pandas.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT datetime, open, high, low, close
+        FROM candles
+        WHERE symbol = ?
+        AND timeframe = ?
+        ORDER BY datetime ASC;
+    """, (symbol, timeframe))
+
+    rows = cursor.fetchall()
+    conn.close()
+
+    import pandas as pd
+
+    df = pd.DataFrame(rows, columns=["datetime", "open", "high", "low", "close"])
+
+    # Conversion datetime
+    df["datetime"] = pd.to_datetime(df["datetime"])
+
+    # Conversion OHLC
+    for col in ["open", "high", "low", "close"]:
+        df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    return df
