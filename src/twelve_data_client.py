@@ -6,10 +6,9 @@ def fetch_eurusd():
 
     if not API_KEY:
         print("TWELVE_DATA_API_KEY is missing.")
-        return
+        return None
 
     url = "https://api.twelvedata.com/time_series"
-
     headers = {
         "Authorization": f"apikey {API_KEY}"
     }
@@ -18,7 +17,6 @@ def fetch_eurusd():
         "symbol": "EUR/USD",
         "interval": "1h",
         "outputsize": 10,
-        "timeout": 10,
         "timezone": "utc"
     }
 
@@ -30,34 +28,13 @@ def fetch_eurusd():
             timeout=10
         )
 
-        status = response.status_code
-        print(f"Status: {status}")
-
-        if status != 200:
-            print("Request failed")
+        if response.status_code != 200:
+            print(f"Request failed: {response.status_code}")
             return None
 
         data = response.json()
-
-        print("\n=== Structure JSON ===")
-        print("Type :", type(data))
-        print("Clés :", data.keys())
-
-        print("\n=== Premier élément des bougies ===")
-        if "values" in data:
-            print(data["values"][0])
-
         return data
 
-    except Exception as e:
-        print("Erreur lors de la requête.")
-        print(f"Détails : {e}")
+    except requests.RequestException as e:
+        print("Network error:", e)
         return None
-
-
-def main():
-    fetch_eurusd()
-
-
-if __name__ == "__main__":
-    main()
