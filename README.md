@@ -1,399 +1,192 @@
-📈 Forex Data Pipeline
-Pipeline pédagogique visant à construire progressivement une architecture de récupération, d’analyse et de stockage de données Forex.
-Le projet est structuré en phases, chacune introduisant un composant essentiel du pipeline.
+Forex Strategy Analyzer — SMA 5/20 Backtest (Année 2025)
 
-🧩 Phase 1 — Core Structure
+1. Contexte et objectif
+   Ce projet a été réalisé dans le cadre d’un mémoire universitaire.
+   L’objectif est de construire un pipeline complet permettant :
 
-Objectif : établir les fondations du projet et manipuler les premières structures Python.
+la collecte automatisée de données Forex (EUR/USD, timeframe 1h)
 
-✔️ Étape 1 — Initial Output
-Création du fichier principal main.py
+leur nettoyage et stockage
 
-Affichage d’un message simple pour valider l’environnement
+le calcul d’indicateurs techniques
 
-✔️ Étape 2 — Configuration Variables
-Définition des paramètres de base : pair, timeframe, candles
+la détection de signaux de trading
 
-Affichage formaté des valeurs
+l’exécution d’un backtest complet
 
-✔️ Étape 3 — Forex Instruments List
-Création d’une liste de paires Forex
+l’analyse quantitative des résultats
 
-Parcours de la liste via une boucle for
+la visualisation via un dashboard interactif Streamlit
 
-✔️ Étape 4 — Core Functions
-Introduction de fonctions dédiées :
+Ce projet illustre la mise en place d’une chaîne Data Engineering appliquée à l’analyse de stratégies de trading.
 
-display_configuration()
+2. Problématique
+   Dans quelle mesure un pipeline automatisé de données financières permet-il d’évaluer de manière fiable une stratégie de trading basée sur le croisement de moyennes mobiles ?
 
-validate_configuration()
+Cette problématique permet d’aborder :
 
-✔️ Étape 5 — Configuration Object
-Regroupement des paramètres dans un dictionnaire config
+la qualité des données
 
-Passage du dictionnaire aux fonctions
+la reproductibilité des analyses
 
-Structuration du code via main()
+la rigueur du backtest
 
-🌐 Phase 2 — API Integration Layer (Twelve Data)
+les limites d’un prototype expérimental
 
-Objectif : apprendre à interagir avec une API réelle, analyser les réponses, gérer les erreurs, sécuriser l’authentification et structurer la logique réseau.
+l’interprétation quantitative d’une stratégie simple
 
-✔️ Étape 6 — HTTP Request Handling
-Passage de Dukascopy → Twelve Data (API stable et professionnelle)
+3. Architecture
+   Code
+   Twelve Data API
+   │
+   ▼
+   twelve_data_client.py
+   │
+   ▼
+   transform.py
+   pandas / Data Quality
+   │
+   ▼
+   database.py
+   SQLite
+   │
+   ▼
+   indicators.py
+   SMA5 / SMA20
+   │
+   ▼
+   backtest.py
+   │
+   ▼
+   dashboard.py
+   Streamlit / Plotly
+4. Pipeline de données
+   ✔ Collecte
+   Récupération des données EUR/USD (H1) via Twelve Data, découpées en deux fenêtres pour couvrir toute l’année 2025.
 
-Requête GET vers https://api.twelvedata.com/time_series
+✔ Transformation
+Nettoyage, typage, tri, conversion des colonnes.
 
-Ajout d’un timeout=10 pour sécuriser les appels réseau
+✔ Stockage
+Insertion dans SQLite avec contrainte d’unicité pour éviter les doublons.
 
-✔️ Étape 7 — Secure Authentication
-Suppression de la clé API en dur dans le code
+✔ Lecture
+Extraction de l’historique complet pour analyse.
 
-Utilisation d’une variable d’environnement : TWELVE_DATA_API_KEY
+✔ Indicateurs
+Calcul de SMA 5 et SMA 20.
 
-Authentification via header HTTP : Authorization: apikey <clé>
+✔ Signaux
+Détection des croisements haussiers (BUY) et baissiers (SELL).
 
-✔️ Étape 8 — JSON Parsing
-Conversion de la réponse en dictionnaire Python via response.json()
+✔ Backtest
+Simulation des trades sur l’année 2025.
 
-Inspection des clés : meta, values, status
+✔ Dashboard
+Visualisation interactive via Streamlit + Plotly.
 
-Extraction d’une bougie OHLC (open, high, low, close)
+5. Stratégie SMA 5/20
+   La stratégie testée est volontairement simple :
 
-✔️ Étape 9 — Response Validation
-Vérification du code HTTP :
+BUY : SMA 5 croise SMA 20 à la hausse
 
-200 → Request successful
-
-autre → Request failed
-
-Gestion propre des erreurs réseau via try / except
-
-✔️ Étape 10 — Forex Data Retrieval
-Récupération de données Forex réelles (EUR/USD, intervalle H1)
-
-Extraction des 10 dernières bougies OHLC
-
-Base du pipeline de données validée
-
-🚀 Phase 3 — Data Processing (pandas)
-
-Objectif : transformer les données brutes issues de l’API Twelve Data en données réellement exploitables pour l’analyse et le stockage.
-
-✔️ Étape 11 — DataFrame pandas
-Transformation de data["values"] en DataFrame
-
-Inspection des types (df.dtypes)
-
-Mise en évidence des limites des données brutes (tout en string)
-
-✔️ Étape 12 — Conversion des types
-Conversion de la colonne datetime en datetime64
-
-Conversion des colonnes OHLC (open, high, low, close) en float64
-
-Suppression des lignes invalides (NaN)
-
-✔️ Étape 13 — Nettoyage et validation
-Tri chronologique du DataFrame
-
-Suppression des doublons temporels (drop_duplicates(subset=["datetime"]))
-
-Réindexation propre
-
-Contrôles qualité :
-
-df.isnull().sum() → validation des valeurs manquantes
-
-df.duplicated(subset=["datetime"]).sum() → validation de l’unicité temporelle
-
-✔️ Étape 14 — Séparation brut / nettoyé
-Ajout de df = df.copy() pour éviter de modifier le DataFrame brut
-
-Conservation de :
-
-raw_df → données originales
-
-clean_df → données transformées et prêtes pour SQLite
-
-🎯 Résultat
-Le pipeline produit désormais un DataFrame :
-
-propre
-
-typé correctement
-
-trié
-
-validé
-
-prêt pour la phase suivante : SQLite Storage
-
-🗄️ Phase 4 — SQLite Storage (Load)
-
-Objectif : stocker les bougies nettoyées dans une base SQLite, avec gestion des doublons.
-
-✔️ Étape 15 — Database Initialization
-Création du dossier data/
-
-Création de la base forex.db
-
-Création de la table candles avec :
-
-id
-
-datetime
-
-symbol
-
-timeframe
-
-open, high, low, close
-
-Contrainte :
-
-Code
-UNIQUE(datetime, symbol, timeframe)
-✔️ Étape 16 — DataFrame → SQLite
-Parcours du DataFrame via df.iterrows()
-
-Conversion du timestamp pandas → string SQL (strftime)
-
-Insertion via :
-
-Code
-INSERT OR IGNORE
-Comptage des lignes réellement insérées
-
-Comptage des lignes totales dans la base
-
-✔️ Étape 17 — Pipeline ETL complet
-Orchestration finale :
-
-Code
-fetch_eurusd()
-↓
-load_raw_data()
-↓
-clean_dataframe()
-↓
-create_table()
-↓
-save_candles()
-🎯 Résultat
-Première exécution :
-
-Code
-Inserted candles: 10
-Rows in database: 11
-Deuxième exécution :
-
-Code
-Inserted candles: 0
-Rows in database: 11
-Pipeline incrémental validé
-
-🌐 Sprint 5 — Lecture historique + Indicateurs SMA
-
-Objectif : exploiter l’historique stocké pour calculer des indicateurs techniques.
-
-✔ Lecture historique
-Ajout de :
-
-Code
-load_candles(symbol, timeframe)
-Retourne un DataFrame pandas complet, trié, typé, prêt pour l’analyse.
-
-✔ Indicateurs SMA
-Création de indicators.py :
-
-sma_5 → moyenne mobile courte
-
-sma_20 → moyenne mobile longue
-
-Détection des croisements :
-
-BUY
-SMA5 franchit SMA20 à la hausse
-
-SELL
-SMA5 franchit SMA20 à la baisse
-
-✔ Pipeline Sprint 5
-Code
-SQLite
-↓
-load_candles()
-↓
-add_sma_strategy()
-↓
-BUY / SELL
-
-📅 Sprint 5.5 — Récupération historique 2025 (Twelve Data)
-
-Objectif : obtenir une année complète de données pour un backtest crédible.
-
-✔ Problème
-Twelve Data limite outputsize → impossible d’obtenir 2025 en un seul appel.
-
-✔ Solution
-Découpage en deux fenêtres :
-
-01/01/2025 → 30/06/2025
-
-01/07/2025 → 31/12/2025
-
-Avec bornes horaires explicites :
-
-Code
-2025-01-01 00:00:00 → 2025-06-30 23:59:59
-2025-07-01 00:00:00 → 2025-12-31 23:59:59
-✔ Fusion
-Les deux listes values sont fusionnées puis nettoyées via clean_dataframe().
-
-✔ Logs mémoire-ready
-Jan-Jun candles: ...
-
-Jul-Dec candles: ...
-
-Historical candles received: ...
-
-Inserted candles: ...
-
-Rows in database: ...
-
-✔ Pipeline Sprint 5.5
-Code
-fetch_eurusd_2025()
-↓
-clean_dataframe()
-↓
-save_candles()
-↓
-load_candles()
-
-🚀 Sprint 6 — Backtest SMA 5 / SMA 20
-
-Objectif : transformer les signaux BUY/SELL en vrais trades simulés.
-
-✔ Règles du backtest
-Capital initial : 10 000 €
+SELL : SMA 5 croise SMA 20 à la baisse
 
 Une seule position à la fois
 
-Pas de short
+Pas de short selling
 
-BUY → entrée en position
+Sortie uniquement sur croisement inverse
 
-SELL → sortie de position
+Cette stratégie est un classique des systèmes de suivi de tendance.
 
-Profit = capital × rendement du trade
+6. Méthodologie du backtest
+   ✔ Hypothèses du modèle
+   Pas de spread
 
-✔ Données enregistrées pour chaque trade
-entry_date
+Pas de slippage
 
-exit_date
+Pas de frais
 
-entry_price
+Pas de stop loss fixe
 
-exit_price
+Pas de take profit fixe
+
+Exposition proportionnelle au capital
+
+Une seule position à la fois
+
+Sortie uniquement sur croisement inverse
+
+Données : EUR/USD, timeframe 1h
+
+Période : année 2025
+
+✔ Calculs effectués
+Pour chaque trade :
+
+entry_date / exit_date
+
+entry_price / exit_price
 
 return_pct
 
 profit
 
-✔ Métriques calculées
-Capital initial
+Métriques :
 
-Capital final
+capital final
 
-Performance %
+rendement
 
-Nombre de trades
+nombre de trades
 
-Trades gagnants
+win rate
 
-Trades perdants
+gain moyen
 
-Win rate %
+perte moyenne (valeur absolue)
 
-✔ Pipeline Sprint 6
-Code
-fetch_eurusd_2025()
-↓
-clean_dataframe()
-↓
-save_candles()
-↓
-load_candles()
-↓
-add_sma_strategy()
-↓
-backtest_strategy()
-↓
-calculate_metrics()
-✔ Exemple de sortie
-Code
-=== BACKTEST RESULTS ===
-Initial capital : 10000.00 €
-Final capital : 10426.55 €
-Return : 4.26 %
-Trades : 12
-Winning trades : 7
-Losing trades : 5
-Win rate : 58.33 %
-🧱 Architecture actuelle du projet
-Code
-src/
-├── main.py
-├── twelve_data_client.py
-├── transform.py
-├── database.py
-├── indicators.py
-└── backtest.py
+profit factor
 
-🟨 Sprint 7 — Métriques avancées (qualité de la stratégie)
-Ajout des métriques essentielles pour un mémoire et un dashboard :
+ratio gain/perte (Avg Win / Avg Loss)
 
-✔ Max drawdown
-Mesure la plus forte baisse du capital depuis un sommet précédent.
+max drawdown
 
-✔ Profit moyen par trade
-Performance moyenne par opération.
+equity curve
 
-✔ Gain moyen des trades gagnants
-Indique la qualité des trades gagnants.
+7. Résultats (Année 2025)
+   Indicateur Résultat
+   Capital initial 10 000 €
+   Capital final 10 417,57 €
+   Rendement +4,18 %
+   Trades 203
+   Trades gagnants 69
+   Trades perdants 134
+   Win rate 33,99 %
+   Gain moyen 45,71 €
+   Perte moyenne 20,42 €
+   Ratio gain/perte 2,24
+   Profit Factor 1,15
+   Max Drawdown -3,88 %
 
-✔ Perte moyenne des trades perdants
-Affichée en valeur absolue pour plus de lisibilité.
+Analyse
+Le backtest met en évidence une légère profitabilité de la stratégie sur l’échantillon étudié.
+Cependant :
 
-✔ Profit factor
-Code
-somme des gains / somme des pertes absolues
-✔ Risk/Reward ratio
-Code
-average_win / average_loss
-Indique si les gains compensent les pertes.
+un win rate faible (33,99 %)
 
-✔ Exemple de sortie
-Code
-=== BACKTEST RESULTS ===
-Initial capital : 10000.00 €
-Final capital : 10418.00 €
-Return : 4.18 %
-Trades : 32
-Winning trades : 11
-Losing trades : 21
-Win rate : 34.37 %
-Average profit : 13.06 €
-Average win : 87.12 €
-Average loss : 24.55 €
-Profit factor : 1.55
-Risk/Reward : 3.55
-Max drawdown : -9.52 %
+compensé par un ratio gain/perte élevé (2,24)
 
-🟦 Sprint 8 — Dashboard Streamlit
-Le dashboard permet une visualisation complète du backtest.
+mais un Profit Factor modeste (1,15)
+
+indiquent que les gains sont moins fréquents mais plus importants que les pertes.
+
+La marge reste limitée :
+l’intégration des coûts de transaction pourrait réduire, voire annuler cette performance.
+
+8. Dashboard
+   Le dashboard Streamlit permet :
 
 ✔ KPI principaux
 Capital final
@@ -411,40 +204,72 @@ Profit Factor
 
 Avg Win / Avg Loss
 
-✔ Graphique principal (Plotly)
-Courbe du prix EUR/USD
+✔ Graphique principal
+Prix EUR/USD
 
 SMA 5
 
 SMA 20
 
-Marqueurs BUY ▲
+BUY ▲
 
-Marqueurs SELL ▼
+SELL ▼
 
 ✔ Equity Curve
 Courbe du capital
 
-Ligne horizontale du capital initial
+Ligne du capital initial
 
 ✔ Table des trades
-return_pct affiché en %
+return_pct en %
 
-profits / pertes par trade
+profits / pertes
 
-✔ Hypothèses du backtest
-Pas de stop loss fixe
-
-Pas de take profit fixe
-
-Pas de spread / slippage / frais
-
-Une seule position à la fois
-
-Sortie uniquement sur croisement inverse
-
-Exposition proportionnelle au capital
-
-✔ Lancement du dashboard
+✔ Lancement
 Code
-python -m streamlit run src/dashboard.py
+python -m streamlit run src/dashboard.py 9. Limites
+Ce prototype :
+
+ne prend pas en compte spread, slippage et frais
+
+n’utilise pas de stop loss / take profit
+
+ne teste qu’une seule paire (EUR/USD)
+
+ne teste qu’une seule année (2025)
+
+ne démontre aucune performance future
+
+repose sur une stratégie simple
+
+ne modélise pas les conditions de marché réelles
+
+Ces limites sont assumées :
+le projet vise à démontrer une méthodologie, pas une stratégie exploitable en production.
+
+10. Installation
+    Code
+    pip install -r requirements.txt
+    ou :
+
+Code
+pip install streamlit plotly pandas requests 11. Lancement
+Pipeline complet
+Code
+python src/main.py
+Dashboard
+Code
+python -m streamlit run src/dashboard.py 12. Technologies
+Python
+
+Pandas
+
+SQLite
+
+Twelve Data API
+
+Streamlit
+
+Plotly
+
+VS Code
