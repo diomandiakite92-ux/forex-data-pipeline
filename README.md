@@ -351,3 +351,100 @@ src/
 ├── database.py
 ├── indicators.py
 └── backtest.py
+
+🟨 Sprint 7 — Métriques avancées (qualité de la stratégie)
+Ajout des métriques essentielles pour un mémoire et un dashboard :
+
+✔ Max drawdown
+Mesure la plus forte baisse du capital depuis un sommet précédent.
+
+✔ Profit moyen par trade
+Performance moyenne par opération.
+
+✔ Gain moyen des trades gagnants
+Indique la qualité des trades gagnants.
+
+✔ Perte moyenne des trades perdants
+Affichée en valeur absolue pour plus de lisibilité.
+
+✔ Profit factor
+Code
+somme des gains / somme des pertes absolues
+✔ Risk/Reward ratio
+Code
+average_win / average_loss
+Indique si les gains compensent les pertes.
+
+✔ Exemple de sortie
+Code
+=== BACKTEST RESULTS ===
+Initial capital : 10000.00 €
+Final capital : 10418.00 €
+Return : 4.18 %
+Trades : 32
+Winning trades : 11
+Losing trades : 21
+Win rate : 34.37 %
+Average profit : 13.06 €
+Average win : 87.12 €
+Average loss : 24.55 €
+Profit factor : 1.55
+Risk/Reward : 3.55
+Max drawdown : -9.52 %
+
+🟦 Sprint 8 — Dashboard Streamlit
+Le dashboard permet une visualisation complète du backtest.
+
+✔ KPI principaux
+Capital final
+
+Rendement
+
+Win Rate
+
+Max Drawdown
+
+✔ KPI avancés
+Nombre de trades
+
+Profit Factor
+
+Avg Win / Avg Loss
+
+✔ Graphique principal (Plotly)
+Courbe du prix EUR/USD
+
+SMA 5
+
+SMA 20
+
+Marqueurs BUY ▲
+
+Marqueurs SELL ▼
+
+✔ Equity Curve
+Courbe du capital
+
+Ligne horizontale du capital initial
+
+✔ Table des trades
+return_pct affiché en %
+
+profits / pertes par trade
+
+✔ Hypothèses du backtest
+Pas de stop loss fixe
+
+Pas de take profit fixe
+
+Pas de spread / slippage / frais
+
+Une seule position à la fois
+
+Sortie uniquement sur croisement inverse
+
+Exposition proportionnelle au capital
+
+✔ Lancement du dashboard
+Code
+python -m streamlit run src/dashboard.py
