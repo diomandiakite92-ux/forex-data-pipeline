@@ -17,7 +17,9 @@ def fetch_eurusd():
     params = {
         "symbol": "EUR/USD",
         "interval": "1h",
-        "outputsize": 10
+        "outputsize": 10,
+        "timeout": 10,
+        "timezone": "utc"
     }
 
     try:
