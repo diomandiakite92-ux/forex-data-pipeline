@@ -1,9 +1,7 @@
-from twelvedata import fetch_eurusd
-from pandas_test import clean_dataframe
-from database_test import create_table, save_candles
-
+from twelve_data_client import fetch_eurusd
+from transform import clean_dataframe
+from database import create_table, save_candles
 import pandas as pd
-
 
 def main():
     data = fetch_eurusd()
@@ -13,7 +11,6 @@ def main():
         return
 
     df = pd.DataFrame(data["values"])
-
     clean_df = clean_dataframe(df)
 
     create_table()
@@ -23,7 +20,6 @@ def main():
         symbol="EUR/USD",
         timeframe="1h"
     )
-
 
 if __name__ == "__main__":
     main()

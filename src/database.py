@@ -2,20 +2,10 @@ import sqlite3
 import os
 
 def get_connection():
-    """
-    Retourne une connexion SQLite vers data/forex.db.
-    Crée le dossier data/ si nécessaire.
-    """
     os.makedirs("data", exist_ok=True)
-    conn = sqlite3.connect("data/forex.db")
-    return conn
-
+    return sqlite3.connect("data/forex.db")
 
 def create_table():
-    """
-    Crée la table candles si elle n'existe pas.
-    À appeler avant save_candles().
-    """
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -36,20 +26,13 @@ def create_table():
     conn.commit()
     conn.close()
 
-
 def save_candles(df, symbol, timeframe):
-    """
-    Parcourt le DataFrame et insère chaque bougie dans SQLite.
-    Retourne le nombre de lignes réellement insérées et le total.
-    """
-
     conn = get_connection()
     cursor = conn.cursor()
 
     inserted = 0
 
     for _, row in df.iterrows():
-        # Conversion du Timestamp pandas → string SQL
         dt = row["datetime"].strftime("%Y-%m-%d %H:%M:%S")
 
         candle = {
@@ -72,7 +55,7 @@ def save_candles(df, symbol, timeframe):
                 inserted += 1
 
         except sqlite3.Error as e:
-            print("SQLite error during insertion:", e)
+            print("SQLite error:", e)
 
     conn.commit()
 
