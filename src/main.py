@@ -1,51 +1,28 @@
-# ============================
-# Forex Data Pipeline
-# ============================
+from twelvedata import fetch_eurusd
+from pandas_test import clean_dataframe
+from database_test import create_table, save_candles
 
-
-def display_configuration(config):
-    print("---------------------------")
-    print("Forex Data Pipeline")
-    print("---------------------------")
-    print(f"Pair       : {config['pair']}")
-    print(f"Timeframe  : {config['timeframe']}")
-    print(f"Candles    : {config['candles']}")
-
-
-def validate_configuration(config):
-    if config["candles"] > 0:
-        print("Configuration is valid.")
-    else:
-        print("Error: The number of candles must be greater than zero.")
+import pandas as pd
 
 
 def main():
+    data = fetch_eurusd()
 
-    #  configuration
-    config = {
-        "pair": "EUR/USD",
-        "timeframe": "H1",
-        "candles": 500
-    }
+    if not data or "values" not in data:
+        print("No market data received.")
+        return
 
-    # appeler display_configuration()
-    display_configuration(config)
+    df = pd.DataFrame(data["values"])
 
-    # appeler validate_configuration()
-    validate_configuration(config)
+    clean_df = clean_dataframe(df)
 
-    # tes paires
-    pairs = [
-        "EUR/USD",
-        "GBP/USD",
-        "USD/JPY",
-        "AUD/USD",
-        "USD/CAD"
-    ]
+    create_table()
 
-    for pair in pairs:
-        # afficher pair
-        print(f"- {pair}")
+    save_candles(
+        clean_df,
+        symbol="EUR/USD",
+        timeframe="1h"
+    )
 
 
 if __name__ == "__main__":

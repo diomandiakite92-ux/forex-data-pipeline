@@ -125,3 +125,66 @@ trié
 validé
 
 prêt pour la phase suivante : SQLite Storage
+
+🗄️ Phase 4 — SQLite Storage (Load)
+Objectif : stocker les bougies nettoyées dans une base SQLite, avec gestion des doublons.
+
+✔️ Étape 15 — Database Initialization
+Création du dossier data/
+
+Création de la base forex.db
+
+Création de la table candles avec :
+
+id
+
+datetime
+
+symbol
+
+timeframe
+
+open, high, low, close
+
+Contrainte :
+
+Code
+UNIQUE(datetime, symbol, timeframe)
+✔️ Étape 16 — DataFrame → SQLite
+Parcours du DataFrame via df.iterrows()
+
+Conversion du timestamp pandas → string SQL (strftime)
+
+Insertion via :
+
+Code
+INSERT OR IGNORE
+Comptage des lignes réellement insérées
+
+Comptage des lignes totales dans la base
+
+✔️ Étape 17 — Pipeline ETL complet
+Orchestration finale :
+
+Code
+fetch_eurusd()
+↓
+load_raw_data()
+↓
+clean_dataframe()
+↓
+create_table()
+↓
+save_candles()
+🎯 Résultat
+Première exécution :
+
+Code
+Inserted candles: 10
+Rows in database: 11
+Deuxième exécution :
+
+Code
+Inserted candles: 0
+Rows in database: 11
+Pipeline incrémental validé
